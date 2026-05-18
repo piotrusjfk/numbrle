@@ -264,3 +264,23 @@ def update_grid(self):
         else:
             self.current_row += 1
             self.current_col = 0
+    def update_status(self, char, res):
+        curr = self.number_statuses[char]
+        if res == 'green': self.number_statuses[char] = 'correct'
+        elif res == 'yellow' and curr != 'correct': self.number_statuses[char] = 'present'
+        elif res == 'grey' and curr == 'unused': self.number_statuses[char] = 'absent'
+
+    def update_number_panel_visuals(self):
+        self.num_canvas.delete("all")
+        for i in range(10):
+            r, c = i // 5, i % 5
+            x, y = c * 75 + 20, r * 70
+            s = self.number_statuses[str(i)]
+            bg = self.style["green"] if s=='correct' else self.style["yellow"] if s=='present' else self.style["grey"] if s=='absent' else self.style["tile_bg"]
+            self.draw_rounded_tile(self.num_canvas, x, y, 60, str(i), bg, "white", strike=(s=='absent'))
+
+
+if __name__ == "__main__":
+    root = tk.Tk()
+    app = NumbrleDeluxe(root)
+    root.mainloop()
