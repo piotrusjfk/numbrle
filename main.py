@@ -142,3 +142,33 @@ def show_nickname_screen(self):
         self.end_buttons_frame.pack(pady=10)
 
         self.root.bind("<Key>", self.handle_keypress)
+
+def draw_grid(self):
+        self.tile_data = []
+        self.grid_canvas.delete("all")
+        for r in range(self.num_tries):
+            row_tiles = []
+            for c in range(self.word_len):
+                x, y = c * 85 + 25, r * 85
+                tids = self.draw_rounded_tile(self.grid_canvas, x, y, 75, "", self.style["tile_bg"], "white")
+                row_tiles.append(tids)
+            self.tile_data.append(row_tiles)
+
+    def show_end_options(self, message, win=True):
+        for widget in self.end_buttons_frame.winfo_children():
+            widget.destroy()
+
+        msg_lbl = tk.Label(self.end_buttons_frame, text=message, font=("Arial", 12, "bold"), 
+                           bg=self.style["bg"], fg=self.style["green"] if win else self.style["strike"])
+        msg_lbl.pack(pady=10)
+
+        btn_frame = tk.Frame(self.end_buttons_frame, bg=self.style["bg"])
+        btn_frame.pack()
+
+        tk.Button(btn_frame, text="KONTYNUUJ JAKO TEN SAM GRACZ", font=("Arial", 10, "bold"),
+                  bg=self.style["green"], fg="white", relief=tk.FLAT, padx=10, pady=5,
+                  command=self.continue_same_player, cursor="hand2").pack(side=tk.LEFT, padx=10)
+
+        tk.Button(btn_frame, text="ZACZNIJ JAKO INNY GRACZ", font=("Arial", 10, "bold"),
+                  bg=self.style["grey"], fg="white", relief=tk.FLAT, padx=10, pady=5,
+                  command=self.show_nickname_screen, cursor="hand2").pack(side=tk.LEFT, padx=10)
