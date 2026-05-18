@@ -49,7 +49,7 @@ def init_game_vars(self):
         if existing_player:
             if tries < existing_player["tries"]:
                 existing_player["tries"] = tries
-                messagebox.showinfo("Nowy rekord!", f"Gratulacje {self.nickname}! To Twój najlepszy wynik!")
+                messagebox.showinfo("nowy rekord", f"Gratulacje {self.nickname}! Twój najlepszy wynik!")
         else:
             scores.append({"nick": self.nickname, "tries": tries})
 
@@ -59,3 +59,32 @@ def init_game_vars(self):
             json.dump(scores, f)
         
         self.update_leaderboard_ui()
+
+def show_nickname_screen(self):
+        self.clear_window()
+        self.login_frame = tk.Frame(self.root, bg=self.style["bg"])
+        self.login_frame.place(relx=0.5, rely=0.5, anchor="center")
+
+        tk.Label(self.login_frame, text="PODAJ SWÓJ NICK", font=("Arial", 24, "bold"), 
+                 bg=self.style["bg"], fg=self.style["text"]).pack(pady=20)
+        
+        self.nick_entry = tk.Entry(self.login_frame, font=("Arial", 18), justify="center", 
+                                  bg="#333338", fg="white", insertbackground="white", bd=0)
+        self.nick_entry.pack(pady=10, ipady=5)
+        self.nick_entry.focus_set()
+
+        btn = tk.Button(self.login_frame, text="ZALOGUJ I GRAJ", font=("Arial", 12, "bold"), 
+                        bg=self.style["green"], fg="white", command=self.start_game, 
+                        width=20, relief=tk.FLAT, cursor="hand2")
+        btn.pack(pady=20)
+        self.root.bind('<Return>', lambda e: self.start_game())
+
+    def start_game(self):
+        name = self.nick_entry.get().strip()
+        if not name:
+            messagebox.showwarning("Wpisz swój nick!")
+            return
+        self.nickname = name
+        self.login_frame.destroy()
+        self.root.unbind('<Return>')
+        self.setup_main_ui()
