@@ -222,3 +222,45 @@ def draw_grid(self):
                 self.guesses[self.current_row][self.current_col] = event.char
                 self.current_col += 1
                 self.update_grid()
+
+def update_grid(self):
+        for c in range(self.word_len):
+            txt = self.guesses[self.current_row][c]
+            self.grid_canvas.itemconfig(self.tile_data[self.current_row][c][1], text=txt)
+
+    def check_guess(self):
+        guess = "".join(self.guesses[self.current_row])
+        colors = [""] * 5
+        target_list = list(self.target)
+
+        for i in range(5):
+            if guess[i] == self.target[i]:
+                colors[i] = "green"
+                target_list[i] = None
+
+        for i in range(5):
+            if colors[i] == "":
+                if guess[i] in target_list:
+                    colors[i] = "yellow"
+                    target_list[target_list.index(guess[i])] = None
+                else:
+                    colors[i] = "grey"
+
+        for i, col in enumerate(colors):
+            self.grid_canvas.itemconfig(self.tile_data[self.current_row][i][0], fill=self.style[col], outline=self.style[col])
+            self.update_status(guess[i], col)
+
+        self.update_number_panel_visuals()
+
+        if guess == self.target:
+            self.save_score(self.current_row + 1)
+            self.root.unbind("<Key>")
+            self.show_end_options(f"Kongratulejszions odgadłeś w {self.current_row+1} prób(ie).", True)
+            self.current_row = 10
+        elif self.current_row == self.num_tries - 1:
+            self.root.unbind("<Key>")
+            self.show_end_options(f"KONIEC PRÓB   Hasło to: {self.target}", False)
+            self.current_row = 10
+        else:
+            self.current_row += 1
+            self.current_col = 0
