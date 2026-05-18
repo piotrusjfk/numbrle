@@ -88,3 +88,57 @@ def show_nickname_screen(self):
         self.login_frame.destroy()
         self.root.unbind('<Return>')
         self.setup_main_ui()
+
+    def setup_main_ui(self):
+        self.clear_window()
+        
+        self.left_sidebar = tk.Frame(self.root, width=250, bg=self.style["sidebar_bg"], padx=15, pady=20)
+        self.left_sidebar.pack(side=tk.LEFT, fill=tk.Y)
+        tk.Label(self.left_sidebar, text="TOP 10 GRACZY", font=("Arial", 16, "bold"), 
+                 bg=self.style["sidebar_bg"], fg=self.style["gold"]).pack(pady=(0,20))
+        self.leaderboard_container = tk.Frame(self.left_sidebar, bg=self.style["sidebar_bg"])
+        self.leaderboard_container.pack(fill=tk.BOTH)
+        self.update_leaderboard_ui()
+
+        self.right_sidebar = tk.Frame(self.root, width=250, bg=self.style["sidebar_bg"], padx=15, pady=20)
+        self.right_sidebar.pack(side=tk.RIGHT, fill=tk.Y)
+        tk.Label(self.right_sidebar, text="ZASADY", font=("Arial", 16, "bold"), 
+                 bg=self.style["sidebar_bg"], fg=self.style["text"]).pack(pady=(0,20))
+        
+        rules_text = (
+            "• Odgadnij 5 cyfr\n"
+            "• Masz 6 prób\n\n"
+            "KOLORY:\n"
+            "● ZIELONY: Trafione!\n"
+            "● ŻÓŁTY: Złe miejsce\n"
+            "● SZARY: Brak w haśle\n\n"
+            "STEROWANIE:\n"
+            "ENTER: Zatwierdź\n"
+            "BACKSPACE: Usuń"
+        )
+        tk.Label(self.right_sidebar, text=rules_text, font=("Arial", 11), 
+                 bg=self.style["sidebar_bg"], fg="#cccccc", justify="left").pack()
+                self.game_container = tk.Frame(self.root, bg=self.style["bg"])
+        self.game_container.pack(side=tk.TOP, fill=tk.BOTH, expand=True)
+        
+        self.welcome_lbl = tk.Label(self.game_container, text=f"Witaj, {self.nickname}!", 
+                                    font=("Arial", 14), bg=self.style["bg"], fg="#888888")
+        self.welcome_lbl.pack(pady=10)
+        
+        self.grid_canvas = tk.Canvas(self.game_container, width=450, height=520, bg=self.style["bg"], highlightthickness=0)
+        self.grid_canvas.pack()
+        self.register_rounded_rect(self.grid_canvas)
+
+        self.draw_grid()
+
+        tk.Label(self.game_container, text="TWOJE CYFRY:", font=("Arial", 10, "bold"), 
+                 bg=self.style["bg"], fg="#888888").pack(pady=(15,0))
+        self.num_canvas = tk.Canvas(self.game_container, width=400, height=140, bg=self.style["bg"], highlightthickness=0)
+        self.num_canvas.pack()
+        self.register_rounded_rect(self.num_canvas)
+        self.update_number_panel_visuals()
+
+        self.end_buttons_frame = tk.Frame(self.game_container, bg=self.style["bg"])
+        self.end_buttons_frame.pack(pady=10)
+
+        self.root.bind("<Key>", self.handle_keypress)
