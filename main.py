@@ -172,3 +172,53 @@ def draw_grid(self):
         tk.Button(btn_frame, text="ZACZNIJ JAKO INNY GRACZ", font=("Arial", 10, "bold"),
                   bg=self.style["grey"], fg="white", relief=tk.FLAT, padx=10, pady=5,
                   command=self.show_nickname_screen, cursor="hand2").pack(side=tk.LEFT, padx=10)
+    def continue_same_player(self):
+        self.init_game_vars()
+        for widget in self.end_buttons_frame.winfo_children():
+            widget.destroy()
+        self.draw_grid()
+        self.update_number_panel_visuals()
+        self.root.bind("<Key>", self.handle_keypress)
+
+    def clear_window(self):
+        for widget in self.root.winfo_children():
+            widget.destroy()
+
+    def update_leaderboard_ui(self):
+        for widget in self.leaderboard_container.winfo_children():
+            widget.destroy()
+        
+        scores = self.load_scores()
+        for i, entry in enumerate(scores):
+            color = self.style["gold"] if i == 0 else "white"
+            txt = f"{i+1}. {entry['nick']} — {entry['tries']} prób"
+            tk.Label(self.leaderboard_container, text=txt, font=("Arial", 11), 
+                     bg=self.style["sidebar_bg"], fg=color, anchor="w").pack(fill=tk.X, pady=2)
+
+    def register_rounded_rect(self, canvas):
+        def _rect(x, y, x2, y2, r, **kwargs):
+            points = (x+r, y, x2-r, y, x2, y, x2, y+r, x2, y2-r, x2, y2, x2-r, y2, x+r, y2, x, y2, x, y2-r, x, y+r, x, y)
+            return canvas.create_polygon(points, **kwargs, smooth=True)
+        canvas.create_rounded_rect = _rect
+
+    def draw_rounded_tile(self, canvas, x, y, size, text, bg, fg, strike=False):
+        t_id = canvas.create_rounded_rect(x, y, x+size, y+size, 12, fill=bg, outline="#4a4a4e")
+        txt_id = canvas.create_text(x+size/2, y+size/2, text=text, fill=fg, font=("Arial", 24, "bold"))
+        if strike:
+            canvas.create_line(x+10, y+10, x+size-10, y+size-10, fill=self.style["strike"], width=3)
+        return t_id, txt_id
+
+    def handle_keypress(self, event):
+        if self.current_row >= self.num_tries: return
+        if event.keysym == "BackSpace":
+            if self.current_col > 0:
+                self.current_col -= 1
+                self.guesses[self.current_row][self.current_col] = ""
+                self.update_grid()
+        elif event.keysym == "Return":
+            if self.current_col == self.word_len: self.check_guess()
+        elif event.char.isdigit():
+            if self.current_col < self.word_len:
+                self.guesses[self.current_row][self.current_col] = event.char
+                self.current_col += 1
+                self.update_grid()
