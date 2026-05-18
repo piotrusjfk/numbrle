@@ -43,3 +43,19 @@ def init_game_vars(self):
 
     def save_score(self, tries):
         scores = self.load_scores()
+
+        existing_player = next((item for item in scores if item["nick"].lower() == self.nickname.lower()), None)
+
+        if existing_player:
+            if tries < existing_player["tries"]:
+                existing_player["tries"] = tries
+                messagebox.showinfo("Nowy rekord!", f"Gratulacje {self.nickname}! To Twój najlepszy wynik!")
+        else:
+            scores.append({"nick": self.nickname, "tries": tries})
+
+        scores = sorted(scores, key=lambda x: x['tries'])[:10]
+        
+        with open(self.scores_file, "w") as f:
+            json.dump(scores, f)
+        
+        self.update_leaderboard_ui()
