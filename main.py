@@ -8,7 +8,7 @@ import os
 class NumbrleDeluxe:
     def __init__(self, root):
         self.root = root
-        self.root.title("Numbrle Pro sigmaligma")
+        self.root.title("Numbrle Deluxe - Pro")
         self.root.geometry("1100x850")
         self.root.configure(bg="#1a1a1e")
         
@@ -26,7 +26,7 @@ class NumbrleDeluxe:
         self.init_game_vars()
         self.show_nickname_screen()
 
-def init_game_vars(self):
+    def init_game_vars(self):
         self.target = "".join([str(random.randint(0, 9)) for _ in range(self.word_len)])
         self.current_row = 0
         self.current_col = 0
@@ -43,16 +43,15 @@ def init_game_vars(self):
 
     def save_score(self, tries):
         scores = self.load_scores()
-
+        
         existing_player = next((item for item in scores if item["nick"].lower() == self.nickname.lower()), None)
 
         if existing_player:
             if tries < existing_player["tries"]:
                 existing_player["tries"] = tries
-                messagebox.showinfo("nowy rekord", f"Gratulacje {self.nickname}! Twój najlepszy wynik!")
+                messagebox.showinfo("Nowy rekord!", f"Gratulacje {self.nickname}! To Twój najlepszy wynik!")
         else:
             scores.append({"nick": self.nickname, "tries": tries})
-
         scores = sorted(scores, key=lambda x: x['tries'])[:10]
         
         with open(self.scores_file, "w") as f:
@@ -60,7 +59,8 @@ def init_game_vars(self):
         
         self.update_leaderboard_ui()
 
-def show_nickname_screen(self):
+    def show_nickname_screen(self):
+        self.init_game_vars()
         self.clear_window()
         self.login_frame = tk.Frame(self.root, bg=self.style["bg"])
         self.login_frame.place(relx=0.5, rely=0.5, anchor="center")
@@ -82,12 +82,13 @@ def show_nickname_screen(self):
     def start_game(self):
         name = self.nick_entry.get().strip()
         if not name:
-            messagebox.showwarning("Wpisz swój nick!")
+            messagebox.showwarning("Błąd", "Wpisz swój nick!")
             return
         self.nickname = name
         self.login_frame.destroy()
         self.root.unbind('<Return>')
         self.setup_main_ui()
+
 
     def setup_main_ui(self):
         self.clear_window()
@@ -118,7 +119,9 @@ def show_nickname_screen(self):
         )
         tk.Label(self.right_sidebar, text=rules_text, font=("Arial", 11), 
                  bg=self.style["sidebar_bg"], fg="#cccccc", justify="left").pack()
-                self.game_container = tk.Frame(self.root, bg=self.style["bg"])
+
+
+        self.game_container = tk.Frame(self.root, bg=self.style["bg"])
         self.game_container.pack(side=tk.TOP, fill=tk.BOTH, expand=True)
         
         self.welcome_lbl = tk.Label(self.game_container, text=f"Witaj, {self.nickname}!", 
@@ -136,6 +139,7 @@ def show_nickname_screen(self):
         self.num_canvas = tk.Canvas(self.game_container, width=400, height=140, bg=self.style["bg"], highlightthickness=0)
         self.num_canvas.pack()
         self.register_rounded_rect(self.num_canvas)
+        self.num_canvas.bind("<Button-1>", self.handle_num_click)
         self.update_number_panel_visuals()
 
         self.end_buttons_frame = tk.Frame(self.game_container, bg=self.style["bg"])
@@ -143,7 +147,7 @@ def show_nickname_screen(self):
 
         self.root.bind("<Key>", self.handle_keypress)
 
-def draw_grid(self):
+    def draw_grid(self):
         self.tile_data = []
         self.grid_canvas.delete("all")
         for r in range(self.num_tries):
@@ -172,6 +176,7 @@ def draw_grid(self):
         tk.Button(btn_frame, text="ZACZNIJ JAKO INNY GRACZ", font=("Arial", 10, "bold"),
                   bg=self.style["grey"], fg="white", relief=tk.FLAT, padx=10, pady=5,
                   command=self.show_nickname_screen, cursor="hand2").pack(side=tk.LEFT, padx=10)
+
     def continue_same_player(self):
         self.init_game_vars()
         for widget in self.end_buttons_frame.winfo_children():
@@ -223,7 +228,19 @@ def draw_grid(self):
                 self.current_col += 1
                 self.update_grid()
 
-def update_grid(self):
+    def handle_num_click(self, event):
+        if self.current_row >= self.num_tries: return
+        for i in range(10):
+            r, c = i // 5, i % 5
+            x, y = c * 75 + 20, r * 70
+            if x <= event.x <= x + 60 and y <= event.y <= y + 60:
+                if self.current_col < self.word_len:
+                    self.guesses[self.current_row][self.current_col] = str(i)
+                    self.current_col += 1
+                    self.update_grid()
+                break
+
+    def update_grid(self):
         for c in range(self.word_len):
             txt = self.guesses[self.current_row][c]
             self.grid_canvas.itemconfig(self.tile_data[self.current_row][c][1], text=txt)
@@ -255,15 +272,16 @@ def update_grid(self):
         if guess == self.target:
             self.save_score(self.current_row + 1)
             self.root.unbind("<Key>")
-            self.show_end_options(f"Kongratulejszions odgadłeś w {self.current_row+1} prób(ie).", True)
+            self.show_end_options(f"GRATULACJE! Odgadłeś w {self.current_row+1} prób(ie).", True)
             self.current_row = 10
         elif self.current_row == self.num_tries - 1:
             self.root.unbind("<Key>")
-            self.show_end_options(f"KONIEC PRÓB   Hasło to: {self.target}", False)
+            self.show_end_options(f"KONIEC PRÓB! Hasło to: {self.target}", False)
             self.current_row = 10
         else:
             self.current_row += 1
             self.current_col = 0
+
     def update_status(self, char, res):
         curr = self.number_statuses[char]
         if res == 'green': self.number_statuses[char] = 'correct'
@@ -284,3 +302,6 @@ if __name__ == "__main__":
     root = tk.Tk()
     app = NumbrleDeluxe(root)
     root.mainloop()
+
+
+
